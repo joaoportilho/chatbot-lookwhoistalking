@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Chatbot</title>
+        <meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href="css/bootstrap.min.css" rel="stylesheet">
+        <script src="js/bootstrap.bundle.min.js"></script>
+        <script>
+            
+            async function adicionar(valor)
+            {
+                let loading = document.getElementById('enviar');
+                loading.hidden = true;
+                if(valor != '')
+                {
+                    console.log(valor);
+                    const xhttp = new XMLHttpRequest();
+                    xhttp.addEventListener("progress", function(event){
+                        if (event.lengthComputable) {
+                            percentComplete = Math.round((event.loaded / event.total) * 100);
+                            console.log(percentComplete);
+                            loading.hidden = false;
+                        }
+                    });
+                    xhttp.onload = function() {
+                        let conteudo = this.responseText;
+                        document.getElementById('mensagem').value = '';
+                        if(document.getElementById('mensagem').type == 'password')
+                        {
+                            document.getElementById('mensagem').type = 'text';
+                        }
+                        if(valor == 'senha')
+                        {
+                            document.getElementById('mensagem').type = 'password';
+                        }
+                        pagina = document.getElementById('chatdiv');
+                        pagina.innerHTML += '<div class="pergunta"><p>' + valor + '</p></div>';
+                        var resposta_possivel = conteudo;
+                        pagina.innerHTML += '<div class="resposta"><p>' + resposta_possivel + '</p></div>';
+                        loading.hidden = false;
+                    }
+                    //console.log(window.location.href);
+                    await xhttp.open("GET","/async/messages.php?prompt=" + encodeURI(valor), true);
+                    
+                    await xhttp.send();
+                    
+                    
+                    
+                }
+            }
+
+            function alterar(id)
+            {
+                let valor = document.getElementById(id).innerHTML;
+                
+            }
+
+            async function carregar(valor)
+            {
+                //callLoading();
+                adicionar(valor);
+                //callLoading();
+            }
+
+            function callLoading()
+            {
+                if(document.getElementById('loading-spinner').className == 'displayed')
+                {
+                    console.log('display to hidden');
+                    document.getElementById('loading-spinner').className = 'hidden';
+                }
+                else
+                {
+                    console.log('hidden to display');
+                    document.getElementById('loading-spinner').className = 'displayed';
+                }
+            }
+
+            async function avaliar(id_prompt, reaction)
+            {
+                /*let loading = document.getElementsByClassName('loading');
+                loading[0].hidden = false;*/
+                if(reaction != '')
+                {
+                    console.log(reaction);
+                    const xhttp = new XMLHttpRequest();
+                    /*xhttp.addEventListener("progress", function(event){
+                        if (event.lengthComputable) {
+                            percentComplete = Math.round((event.loaded / event.total) * 100);
+                            console.log(percentComplete);
+                            loading[0].hidden = true;
+                        }
+                    });*/
+                    xhttp.onload = function() {
+                        let conteudo = this.responseText;
+                        console.log(conteudo);
+                        if(conteudo == "Success")
+                        {
+                            content = document.getElementById(id_prompt);
+                            content.innerHTML = '<h3>Obrigado!</h3>'
+                            setTimeout(() => {
+                                content.hidden = true;
+                            }, 500);
+                        }
+                    }
+                    //console.log(window.location.href);
+                    await xhttp.open("GET","/async/aval.php?id=" + id_prompt + "&reaction=" + reaction, true);
+                    
+                    await xhttp.send();
+                    
+                    
+                    
+                }
+            }
+        </script>
+        <style>
+            /*body::-webkit-scrollbar{
+                display: none;
+                
+            }*/
+            body{
+                margin: 0px;
+                padding: 0px;
+            }
+            .class-chat {
+                margin: 0px auto 0px auto;
+                padding: 10px;
+                background-color:  black/*#4C53B5 #313675*/;
+                /*border-radius: 10px;*/
+                overflow-y: scroll;
+                min-height: 95vh;
+                min-width: 95%;
+                flex-direction: column-reverse;
+                font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+                color: white;
+            }
+            .pergunta
+            {
+                padding: 10px;
+                border: 1px solid #B1B6F7;
+                background-color: #5159C2;
+                width: 100%;
+            }
+            .resposta
+            {
+                padding: 10px;
+                background-color: #23275E;
+                border: 1px solid #B1B6F7;
+                width: 100%;
+            }
+            input[type="button"]
+            {
+                border: none;
+                background-color: rgb(173, 151, 151);
+                font-family: Arial, Helvetica, sans-serif;
+                width: 9%;
+                height: 30px;
+                /*font-size: 16pt;*/
+
+            }
+            button
+            {
+                border: none;
+                background-color: rgb(173, 151, 151);
+                font-family: Arial, Helvetica, sans-serif;
+                width: 9%;
+                height: 30px;
+                /*font-size: 16pt;*/
+
+            }
+            input[type="text"]
+            {
+                border-radius: 5px;
+                border: 2px solid black;
+                /*font-family: 'Times New Roman', Times, serif;*/
+                font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+                font-size: 10pt;
+                width: 90%;
+                height: 30px;
+                outline: none;
+            }
+
+            input[type="password"]
+            {
+                border-radius: 5px;
+                border: 2px solid black;
+                font-family: 'Times New Roman', Times, serif;
+                font-size: 14pt;
+                width: 90%;
+                height: 30px;
+                outline: none;
+            }
+
+            .reaction{
+                transition: 0.5s;
+                width: 64px;
+            }
+            .reaction:hover{
+                transition: 0.5s;
+                width: 96px;
+            }
+
+            .hidden{
+                display: none!important;
+            }
+
+            .displayed{
+                display: block!important;
+            }
+            /*h2{
+                font-size: 24pt;
+            }*/
+        </style>
+    </head>
+    <body>
+        <div class="hidden" style="position: fixed; bottom: 10%; left: 48%;" id="loading-spinner">
+            <div class="spinner-border" role="status">
+              <span class="sr-only"></span>
+            </div>
+        </div>
+        <a href="logoff.php" type="button" id="logoff"style="position:fixed; top: 0px; right: 0px; padding:5px; width:50px; background-color:white; text-align: center; text-decoration: none; color: black;">Sair</a>
+
+        <div class="class-chat" id="chatdiv">
+            <h2>Atenção! Não se esqueça de rolar a página para continuar a interação.</h2>
+        </div>
+        <div style="position:fixed; bottom: 2px; width: 100%;">
+            <input type="text" id="mensagem"/>
+            <button id="enviar" onclick="adicionar(document.getElementById('mensagem').value)">Enviar</button>
+        </div>
+    </body>
+</html>
